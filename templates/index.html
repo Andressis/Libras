@@ -36,7 +36,7 @@
             margin: 20px 0;
             position: relative;
         }
-        #video {
+        #videoElement {
             width: 100%;
             height: auto;
             max-height: 400px;
@@ -161,17 +161,17 @@
         </header>
 
         <div class="video-container">
-            <img id="video" src="{{ url_for('video') }}" alt="Câmera em tempo real">
+            <video id="videoElement" autoplay playsinline muted></video>
         </div>
 
-        <div class="camera-status">Câmera ativa</div>
+        <div class="camera-status" id="cameraStatus">Solicitando permissão da câmera...</div>
 
         <div class="btn-container">
             <button id="pauseBtn" class="btn">Pausar</button>
         </div>
 
         <div class="letter-display">
-            <div class="letter-box" id="detectedLetter"></div>
+            <div class="letter-box" id="detectedLetter">?</div>
             <div class="letter-instruction">Faça um sinal para reconhecer</div>
             <div class="letter-recognized">Letra reconhecida: <span id="recognizedLetter"></span></div>
         </div>
@@ -180,11 +180,11 @@
     <div class="container instructions">
         <h2>Como usar:</h2>
         <ol>
-            <li>Clique em "Iniciar Reconhecimento" para ativar a câmera</li>
-            <li>Posicione sua mão no centro da imagem</li>
-            <li>Faça os sinais do alfabeto em Libras</li>
-            <li>A letra correspondente será exibida na tela</li>
-            <li>Use o grid abaixo para praticar todas as letras</li>
+            <li>A página solicitará permissão para acessar a câmera;</li>
+            <li>Posicione sua mão no centro da imagem;</li>
+            <li>Faça os sinais do alfabeto em Libras;</li>
+            <li>A letra correspondente será exibida na tela;</li>
+            <li>Use o grid abaixo para praticar todas as letras.</li>
         </ol>
     </div>
 
@@ -192,32 +192,13 @@
         <h3 style="text-align: center;">Escolha uma letra para praticar:</h3>
         <div id="letterToShow"></div>
         <div class="alphabet-grid">
-            <div class="alphabet-letter" data-letter="A">A</div>
-            <div class="alphabet-letter" data-letter="B">B</div>
-            <div class="alphabet-letter" data-letter="C">C</div>
-            <div class="alphabet-letter" data-letter="D">D</div>
-            <div class="alphabet-letter" data-letter="E">E</div>
-            <div class="alphabet-letter" data-letter="F">F</div>
-            <div class="alphabet-letter" data-letter="G">G</div>
-            <div class="alphabet-letter" data-letter="H">H</div>
-            <div class="alphabet-letter" data-letter="I">I</div>
-            <div class="alphabet-letter" data-letter="J">J</div>
-            <div class="alphabet-letter" data-letter="K">K</div>
-            <div class="alphabet-letter" data-letter="L">L</div>
-            <div class="alphabet-letter" data-letter="M">M</div>
-            <div class="alphabet-letter" data-letter="N">N</div>
-            <div class="alphabet-letter" data-letter="O">O</div>
-            <div class="alphabet-letter" data-letter="P">P</div>
-            <div class="alphabet-letter" data-letter="Q">Q</div>
-            <div class="alphabet-letter" data-letter="R">R</div>
-            <div class="alphabet-letter" data-letter="S">S</div>
-            <div class="alphabet-letter" data-letter="T">T</div>
-            <div class="alphabet-letter" data-letter="U">U</div>
-            <div class="alphabet-letter" data-letter="V">V</div>
-            <div class="alphabet-letter" data-letter="W">W</div>
-            <div class="alphabet-letter" data-letter="X">X</div>
-            <div class="alphabet-letter" data-letter="Y">Y</div>
-            <div class="alphabet-letter" data-letter="Z">Z</div>
+            <!-- Letras A-Z -->
+            <script>
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                letters.forEach(l => {
+                    document.write(`<div class="alphabet-letter" data-letter="${l}">${l}</div>`);
+                });
+            </script>
         </div>
     </div>
 
@@ -226,72 +207,55 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('video');
+        document.addEventListener('DOMContentLoaded', async () => {
+            const video = document.getElementById('videoElement');
+            const cameraStatus = document.getElementById('cameraStatus');
             const pauseBtn = document.getElementById('pauseBtn');
             const detectedLetter = document.getElementById('detectedLetter');
             const recognizedLetter = document.getElementById('recognizedLetter');
             const letterToShow = document.getElementById('letterToShow');
             const alphabetLetters = document.querySelectorAll('.alphabet-letter');
-            
             let isPaused = false;
-            let videoSrc = video.src;
-            
-            // Função para atualizar a letra detectada
-            function updateDetectedLetter() {
-                if (!isPaused) {
-                    fetch('/get_letter')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.letter) {
-                                detectedLetter.textContent = data.letter;
-                                recognizedLetter.textContent = data.letter;
-                                
-                                // Verificar se a letra detectada corresponde à letra que deve ser praticada
-                                const activeLetter = document.querySelector('.alphabet-letter.active');
-                                if (activeLetter && activeLetter.dataset.letter === data.letter) {
-                                    activeLetter.style.backgroundColor = '#28a745';
-                                    setTimeout(() => {
-                                        activeLetter.style.backgroundColor = '';
-                                        activeLetter.classList.add('active');
-                                    }, 1000);
-                                }
-                            }
-                            setTimeout(updateDetectedLetter, 500);
-                        })
-                        .catch(error => {
-                            console.error('Erro ao obter a letra:', error);
-                            setTimeout(updateDetectedLetter, 1000);
-                        });
-                }
+
+            // Solicita permissão e inicia a webcam
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                video.srcObject = stream;
+                cameraStatus.textContent = 'Câmera ativa';
+            } catch (err) {
+                console.error('Erro ao acessar a câmera:', err);
+                cameraStatus.textContent = 'Não foi possível acessar a câmera';
+                return;
             }
-            
-            // Iniciar a detecção de letras
-            updateDetectedLetter();
-            
-            // Botão de pausar/retomar
-            pauseBtn.addEventListener('click', function() {
-                if (isPaused) {
-                    video.src = videoSrc;
-                    pauseBtn.textContent = 'Pausar';
-                    isPaused = false;
-                    updateDetectedLetter();
-                } else {
-                    video.src = '';
-                    pauseBtn.textContent = 'Retomar';
-                    isPaused = true;
+
+            // Função para obter a letra do servidor
+            async function updateDetectedLetter() {
+                if (isPaused) return;
+                try {
+                    const res = await fetch('/get_letter');
+                    const data = await res.json();
+                    const letter = data.letter || '?';
+                    detectedLetter.textContent = letter;
+                    recognizedLetter.textContent = letter;
+                } catch (e) {
+                    console.error('Erro ao obter letra:', e);
                 }
+                setTimeout(updateDetectedLetter, 500);
+            }
+            updateDetectedLetter();
+
+            // Botão pausar/retomar
+            pauseBtn.addEventListener('click', () => {
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'Retomar' : 'Pausar';
             });
-            
-            // Adicionar evento de clique às letras do alfabeto
+
+            // Clique nas letras para praticar
             alphabetLetters.forEach(letter => {
-                letter.addEventListener('click', function() {
-                    // Remover a classe 'active' de todas as letras
+                letter.addEventListener('click', () => {
                     alphabetLetters.forEach(l => l.classList.remove('active'));
-                    // Adicionar a classe 'active' à letra clicada
-                    this.classList.add('active');
-                    // Exibir a letra a ser praticada
-                    letterToShow.textContent = `Pratique a letra: ${this.dataset.letter}`;
+                    letter.classList.add('active');
+                    letterToShow.textContent = `Pratique a letra: ${letter.dataset.letter}`;
                 });
             });
         });
