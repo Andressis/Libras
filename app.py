@@ -5,9 +5,10 @@ import numpy as np
 from keras.models import load_model
 import os
 import base64
+from flask_cors import CORS
 
-# Inicialização do Flask
 app = Flask(__name__)
+CORS(app)
 
 # Inicialização do modelo e MediaPipe
 model = load_model('keras_model.h5')
