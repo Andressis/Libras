@@ -36,7 +36,7 @@
             margin: 20px 0;
             position: relative;
         }
-        #video {
+        # {
             width: 100%;
             height: auto;
             max-height: 400px;
@@ -161,7 +161,7 @@
         </header>
 
         <div class="video-container">
-            <img id="video" src="{{ url_for('video') }}" alt="Câmera em tempo real">
+            <video id="video" autoplay playsinline></video>
         </div>
 
         <div class="camera-status">Câmera ativa</div>
