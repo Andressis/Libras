@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response, jsonify
 import cv2
+import os
 import mediapipe as mp
 import numpy as np
 from keras.models import load_model
@@ -84,4 +85,6 @@ def get_letter():
     return jsonify({'letter': current_letter})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Definindo a porta de acordo com a variável de ambiente ou 5000 por padrão
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
