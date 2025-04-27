@@ -151,13 +151,6 @@
             font-weight: bold;
             font-size: 20px;
         }
-        .camera-error {
-            text-align: center;
-            color: #dc3545;
-            margin: 10px 0;
-            font-weight: 500;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -169,14 +162,15 @@
 
         <div class="video-container">
             <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <img id="processedImage" style="display: none; width: 100%; height: auto; max-height: 400px; border-radius: 5px;" alt="Imagem processada">
         </div>
 
-        <div class="camera-status">Aguardando permissão da câmera...</div>
-        <div class="camera-error" id="cameraError">Erro ao acessar a câmera. Verifique as permissões.</div>
+        <div class="camera-status" id="cameraStatus">Aguardando câmera...</div>
 
         <div class="btn-container">
-            <button id="pauseBtn" class="btn">Pausar</button>
-            <button id="restartBtn" class="btn">Reiniciar Câmera</button>
+            <button id="startBtn" class="btn">Iniciar Reconhecimento</button>
+            <button id="pauseBtn" class="btn" style="display: none;">Pausar</button>
         </div>
 
         <div class="letter-display">
@@ -189,7 +183,7 @@
     <div class="container instructions">
         <h2>Como usar:</h2>
         <ol>
-            <li>Permita o acesso à sua câmera quando solicitado</li>
+            <li>Clique em "Iniciar Reconhecimento" para ativar a câmera</li>
             <li>Posicione sua mão no centro da imagem</li>
             <li>Faça os sinais do alfabeto em Libras</li>
             <li>A letra correspondente será exibida na tela</li>
@@ -208,25 +202,18 @@
             <div class="alphabet-letter" data-letter="E">E</div>
             <div class="alphabet-letter" data-letter="F">F</div>
             <div class="alphabet-letter" data-letter="G">G</div>
-            <div class="alphabet-letter" data-letter="H">H</div>
             <div class="alphabet-letter" data-letter="I">I</div>
-            <div class="alphabet-letter" data-letter="J">J</div>
-            <div class="alphabet-letter" data-letter="K">K</div>
             <div class="alphabet-letter" data-letter="L">L</div>
             <div class="alphabet-letter" data-letter="M">M</div>
             <div class="alphabet-letter" data-letter="N">N</div>
             <div class="alphabet-letter" data-letter="O">O</div>
             <div class="alphabet-letter" data-letter="P">P</div>
-            <div class="alphabet-letter" data-letter="Q">Q</div>
             <div class="alphabet-letter" data-letter="R">R</div>
             <div class="alphabet-letter" data-letter="S">S</div>
             <div class="alphabet-letter" data-letter="T">T</div>
             <div class="alphabet-letter" data-letter="U">U</div>
             <div class="alphabet-letter" data-letter="V">V</div>
             <div class="alphabet-letter" data-letter="W">W</div>
-            <div class="alphabet-letter" data-letter="X">X</div>
-            <div class="alphabet-letter" data-letter="Y">Y</div>
-            <div class="alphabet-letter" data-letter="Z">Z</div>
         </div>
     </div>
 
@@ -237,82 +224,87 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const processedImage = document.getElementById('processedImage');
+            const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
-            const restartBtn = document.getElementById('restartBtn');
             const detectedLetter = document.getElementById('detectedLetter');
             const recognizedLetter = document.getElementById('recognizedLetter');
             const letterToShow = document.getElementById('letterToShow');
             const alphabetLetters = document.querySelectorAll('.alphabet-letter');
-            const cameraStatus = document.querySelector('.camera-status');
-            const cameraError = document.getElementById('cameraError');
+            const cameraStatus = document.getElementById('cameraStatus');
             
-            let isPaused = false;
-            let mediaStream = null;
-            let frameProcessingInterval = null;
+            let isRunning = false;
+            let stream = null;
+            let processingInterval = null;
             
             // Função para iniciar a câmera
-            async function startCamera() {
+            startBtn.addEventListener('click', async function() {
                 try {
-                    cameraStatus.textContent = "Aguardando permissão da câmera...";
-                    cameraStatus.style.color = "#28a745";
-                    cameraError.style.display = "none";
-                    
-                    mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
-                            width: 640, 
-                            height: 480,
-                            facingMode: 'user' 
+                            facingMode: 'user',
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
                         } 
                     });
                     
-                    video.srcObject = mediaStream;
-                    video.onloadedmetadata = function() {
-                        cameraStatus.textContent = "Câmera ativa";
-                        isPaused = false;
-                        pauseBtn.textContent = "Pausar";
-                        
-                        // Iniciar o envio de frames para o servidor
-                        startFrameProcessing();
-                    };
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    processedImage.style.display = 'none';
+                    
+                    startBtn.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+                    cameraStatus.textContent = 'Câmera ativa';
+                    cameraStatus.style.color = '#28a745';
+                    
+                    isRunning = true;
+                    
+                    // Iniciar processamento de frames
+                    processingInterval = setInterval(processFrame, 200);
+                    
                 } catch (err) {
-                    console.error("Erro ao acessar a câmera:", err);
-                    cameraStatus.textContent = "Erro ao acessar a câmera";
-                    cameraStatus.style.color = "#dc3545";
-                    cameraError.style.display = "block";
+                    console.error('Erro ao acessar a câmera:', err);
+                    cameraStatus.textContent = 'Erro ao acessar a câmera';
+                    cameraStatus.style.color = '#dc3545';
                 }
-            }
+            });
             
-            // Função para iniciar o processamento de frames
-            function startFrameProcessing() {
-                // Limpar o intervalo anterior, se existir
-                if (frameProcessingInterval) {
-                    clearInterval(frameProcessingInterval);
+            // Função para pausar/retomar
+            pauseBtn.addEventListener('click', function() {
+                if (isRunning) {
+                    clearInterval(processingInterval);
+                    video.pause();
+                    pauseBtn.textContent = 'Retomar';
+                    cameraStatus.textContent = 'Câmera pausada';
+                    cameraStatus.style.color = '#ffc107';
+                    isRunning = false;
+                } else {
+                    video.play();
+                    pauseBtn.textContent = 'Pausar';
+                    cameraStatus.textContent = 'Câmera ativa';
+                    cameraStatus.style.color = '#28a745';
+                    isRunning = true;
+                    processingInterval = setInterval(processFrame, 200);
                 }
-                
-                // Definir um novo intervalo para processar frames
-                frameProcessingInterval = setInterval(sendFrameToServer, 200);
-            }
+            });
             
-            // Função para enviar frames para o servidor
-            function sendFrameToServer() {
-                if (isPaused || !video.srcObject) return;
+            // Função para processar o frame atual
+            function processFrame() {
+                if (!isRunning || !stream) return;
                 
-                // Criar um canvas temporário para capturar o frame
-                const canvas = document.createElement('canvas');
+                // Configurar o canvas com as dimensões do vídeo
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
+                
+                // Desenhar o frame no canvas
                 const ctx = canvas.getContext('2d');
-                
-                // Verificar se o vídeo está pronto para ser capturado
-                if (video.videoWidth === 0 || video.videoHeight === 0) return;
-                
-                // Desenhar o frame atual no canvas
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // Converter para base64
-                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                // Obter a imagem como base64
+                const imageData = canvas.toDataURL('image/jpeg');
                 
-                // Enviar para o servidor
+                // Enviar para o backend
                 fetch('/process_frame', {
                     method: 'POST',
                     headers: {
@@ -322,6 +314,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Atualizar a letra detectada
                     if (data.letter) {
                         detectedLetter.textContent = data.letter;
                         recognizedLetter.textContent = data.letter;
@@ -336,64 +329,30 @@
                             }, 1000);
                         }
                     }
+                    
+                    // Mostrar a imagem processada se houver
+                    if (data.processed_image) {
+                        video.style.display = 'none';
+                        processedImage.src = data.processed_image;
+                        processedImage.style.display = 'block';
+                    } else {
+                        video.style.display = 'block';
+                        processedImage.style.display = 'none';
+                    }
                 })
                 .catch(error => {
                     console.error('Erro ao processar o frame:', error);
                 });
             }
             
-            // Botão de pausar/retomar
-            pauseBtn.addEventListener('click', function() {
-                if (isPaused) {
-                    // Reativar a câmera existente
-                    if (mediaStream) {
-                        video.srcObject = mediaStream;
-                        isPaused = false;
-                        pauseBtn.textContent = 'Pausar';
-                        cameraStatus.textContent = "Câmera ativa";
-                        cameraStatus.style.color = "#28a745";
-                        startFrameProcessing();
-                    } else {
-                        // Se não houver stream, iniciar a câmera
-                        startCamera();
-                    }
-                } else {
-                    // Pausar a câmera
-                    video.srcObject = null;
-                    isPaused = true;
-                    pauseBtn.textContent = 'Retomar';
-                    cameraStatus.textContent = "Câmera pausada";
-                    cameraStatus.style.color = "#6c757d";
-                    if (frameProcessingInterval) {
-                        clearInterval(frameProcessingInterval);
-                        frameProcessingInterval = null;
-                    }
-                }
-            });
-            
-            // Botão de reiniciar câmera
-            restartBtn.addEventListener('click', function() {
-                // Parar todos os tracks do stream atual
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                    mediaStream = null;
-                }
-                
-                // Limpar o intervalo de processamento de frames
-                if (frameProcessingInterval) {
-                    clearInterval(frameProcessingInterval);
-                    frameProcessingInterval = null;
-                }
-                
-                // Reiniciar a câmera
-                startCamera();
-            });
-            
             // Adicionar evento de clique às letras do alfabeto
             alphabetLetters.forEach(letter => {
                 letter.addEventListener('click', function() {
                     // Remover a classe 'active' de todas as letras
-                    alphabetLetters.forEach(l => l.classList.remove('active'));
+                    alphabetLetters.forEach(l => {
+                        l.classList.remove('active');
+                        l.style.backgroundColor = '';
+                    });
                     // Adicionar a classe 'active' à letra clicada
                     this.classList.add('active');
                     // Exibir a letra a ser praticada
@@ -401,8 +360,15 @@
                 });
             });
             
-            // Iniciar a câmera quando a página carregar
-            startCamera();
+            // Limpar recursos ao sair da página
+            window.addEventListener('beforeunload', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                if (processingInterval) {
+                    clearInterval(processingInterval);
+                }
+            });
         });
     </script>
 </body>
