@@ -1,9 +1,9 @@
 from flask import Flask, render_template, Response, jsonify
 import cv2
-import os
 import mediapipe as mp
 import numpy as np
 from keras.models import load_model
+import os
 
 # Inicialização do Flask
 app = Flask(__name__)
