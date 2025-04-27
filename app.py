@@ -41,6 +41,9 @@ def process_frame():
     frameRGB.flags.writeable = True
     
     # Verificar se há mãos na imagem
+    processed_image = img.copy()
+    hand_detected = False
+    
     if results.multi_hand_landmarks:
         for hand in results.multi_hand_landmarks:
             x_max, y_max, x_min, y_min = 0, 0, img.shape[1], img.shape[0]
@@ -51,6 +54,10 @@ def process_frame():
             
             x_min, y_min = max(0, x_min-50), max(0, y_min-50)
             x_max, y_max = min(img.shape[1], x_max+50), min(img.shape[0], y_max+50)
+            
+            # Desenhar retângulo verde ao redor da mão
+            cv2.rectangle(processed_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            hand_detected = True
             
             imgCrop = img[y_min:y_max, x_min:x_max]
             if imgCrop.size != 0:
@@ -65,7 +72,18 @@ def process_frame():
                 # Atualizar a letra reconhecida
                 current_letter = classes[indexVal]
                 
-    return jsonify({'letter': current_letter})
+                # Adicionar letra vermelha acima do retângulo verde
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                text_x = x_min + int((x_max - x_min) / 2) - 20
+                text_y = y_min - 30
+                cv2.putText(processed_image, current_letter, (text_x, text_y), 
+                           font, 3, (0, 0, 255), 5, cv2.LINE_AA)
+    
+    # Converter a imagem processada para base64 para enviar de volta ao front-end
+    _, buffer = cv2.imencode('.jpg', processed_image)
+    processed_img_base64 = base64.b64encode(buffer).decode('utf-8')
+    
+    return jsonify({'letter': current_letter, 'processed_image': f'data:image/jpeg;base64,{processed_img_base64}', 'hand_detected': hand_detected})
 
 # Rota para obter a letra reconhecida atual
 @app.route('/get_letter')
