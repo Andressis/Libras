@@ -268,6 +268,36 @@
             
             // Iniciar a detecção de letras
             updateDetectedLetter();
+
+             // Solicitar permissão para acessar a câmera
+            async function startCamera() {
+            const videoElement = document.getElementById('video');
+            const constraints = {
+                video: { facingMode: 'user' }
+            };
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoElement.srcObject = stream;
+                    videoElement.play();
+                } catch (err) {
+                    alert("Não foi possível acessar a câmera. Verifique as permissões.");
+                }
+            }
+
+            // Iniciar a câmera assim que a página for carregada
+            window.onload = function() {
+            startCamera();
+
+            // Requisitar as letras detectadas a cada 100ms
+            setInterval(function() {
+                fetch('/get_letter')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("letterDisplay").innerText = "Letra: " + data.letter;
+                        });
+                }, 100);
+            };
             
             // Botão de pausar/retomar
             pauseBtn.addEventListener('click', function() {
