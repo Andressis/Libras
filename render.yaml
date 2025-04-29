@@ -1,0 +1,15 @@
+# render.yaml
+services:
+  - type: web
+    name: libras-recognition
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.9  # Usando a mesma versão do seu ambiente local
+    
+    # Configurações adicionais para garantir que os arquivos sejam incluídos
+    assets:
+      - location: /
+        includeSubfolders: true
