@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="permissions-policy" content="camera=*, microphone=*">
     <title>Reconhecimento do Alfabeto em Libras</title>
     <style>
         body {
@@ -168,15 +169,14 @@
             margin: 5px 0;
             display: none;
         }
-        #debugInfo {
-            background-color: #f8f9fa;
-            padding: 10px;
+        #https-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
             border-radius: 5px;
+            padding: 10px;
             margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 150px;
-            overflow: auto;
+            text-align: center;
             display: none;
         }
     </style>
@@ -188,9 +188,9 @@
             <p>Aprenda e pratique o alfabeto da Língua Brasileira de Sinais</p>
         </header>
 
+        <div id="https-warning"></div>
         <div id="serverStatus"></div>
         <div class="error-message" id="errorMessage"></div>
-        <div id="debugInfo"></div>
 
         <div class="video-container">
             <video id="video" autoplay playsinline></video>
@@ -204,7 +204,6 @@
             <button id="startBtn" class="btn">Iniciar Reconhecimento</button>
             <button id="pauseBtn" class="btn" style="display: none;">Pausar</button>
             <button id="testConnectionBtn" class="btn">Verificar Conexão</button>
-            <button id="showDebugBtn" class="btn">Debug</button>
         </div>
 
         <div class="letter-display">
@@ -263,7 +262,6 @@
             const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
             const testConnectionBtn = document.getElementById('testConnectionBtn');
-            const showDebugBtn = document.getElementById('showDebugBtn');
             const detectedLetter = document.getElementById('detectedLetter');
             const recognizedLetter = document.getElementById('recognizedLetter');
             const letterToShow = document.getElementById('letterToShow');
@@ -271,40 +269,253 @@
             const cameraStatus = document.getElementById('cameraStatus');
             const errorMessage = document.getElementById('errorMessage');
             const serverStatus = document.getElementById('serverStatus');
-            const debugInfo = document.getElementById('debugInfo');
+            const httpsWarning = document.getElementById('https-warning');
             
             let isRunning = false;
             let stream = null;
             let processingInterval = null;
-            let debugVisible = false;
-            let logMessages = [];
             
-            // Função para logging
-            function log(message, type='info') {
-                const timestamp = new Date().toLocaleTimeString();
-                const logMessage = `[${timestamp}] [${type}] ${message}`;
-                console.log(logMessage);
-                
-                // Adicionar à lista de mensagens de log
-                logMessages.push(logMessage);
-                if (logMessages.length > 50) logMessages.shift(); // Manter só as 50 últimas mensagens
-                
-                // Atualizar debug info se estiver visível
-                if (debugVisible) {
-                    debugInfo.innerHTML = logMessages.join('<br>');
-                    debugInfo.scrollTop = debugInfo.scrollHeight; // Auto-scroll para a última mensagem
-                }
+            // Verificar se estamos em HTTPS
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                httpsWarning.textContent = 'Este site precisa ser acessado via HTTPS para permitir o uso da câmera. Tente usar "https://" no início da URL.';
+                httpsWarning.style.display = 'block';
+                console.warn('Protocolo inseguro detectado:', location.protocol);
             }
             
             // Verificar status do servidor ao carregar a página
             checkServerStatus();
             
-            // Toggle debug info
-            showDebugBtn.addEventListener('click', function() {
-                debugVisible = !debugVisible;
-                debugInfo.style.display = debugVisible ? 'block' : 'none';
-                if (debugVisible) {
-                    debugInfo.innerHTML = logMessages.join('<br>');
-                    debugInfo.scrollTop = debugInfo.scrollHeight;
+            // Função para verificar o status do servidor
+            testConnectionBtn.addEventListener('click', checkServerStatus);
+            
+            function checkServerStatus() {
+                fetch('/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        serverStatus.style.display = 'block';
+                        serverStatus.innerHTML = `
+                            Servidor conectado! <br>
+                            Modelo carregado: ${data.model_loaded ? 'Sim' : 'Não'} <br>
+                            Classes disponíveis: ${data.classes ? data.classes.length : 0}
+                        `;
+                        serverStatus.style.backgroundColor = '#d4edda';
+                    })
+                    .catch(error => {
+                        serverStatus.style.display = 'block';
+                        serverStatus.textContent = 'Erro ao conectar com o servidor. Verifique se o serviço está rodando.';
+                        serverStatus.style.backgroundColor = '#f8d7da';
+                        console.error('Erro ao verificar status do servidor:', error);
+                    });
+            }
+            
+            // Função para exibir mensagem de erro
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 8000); // Aumentado para 8 segundos para dar mais tempo para o usuário ler
+            }
+            
+            // Função para iniciar a câmera - versão melhorada
+            startBtn.addEventListener('click', async function() {
+                try {
+                    // Verificar se o navegador suporta a API MediaDevices
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        showError('Seu navegador não suporta o acesso à câmera. Use um navegador moderno como Chrome, Firefox ou Edge.');
+                        return;
+                    }
+                    
+                    // Verificar explicitamente se estamos em HTTPS
+                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        showError('O acesso à câmera requer uma conexão segura (HTTPS). Tente acessar o site com "https://" no início da URL.');
+                        console.error('Protocolo inseguro detectado:', location.protocol);
+                        return;
+                    }
+                    
+                    console.log('Solicitando acesso à câmera...');
+                    
+                    // Tentar acessar a câmera com configurações mais permissivas
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true,  // Simplificado para maior compatibilidade
+                        audio: false
+                    });
+                    
+                    console.log('Câmera acessada com sucesso!', stream);
+                    
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    processedImage.style.display = 'none'; // Esconder a imagem processada inicialmente
+                    
+                    // Garantir que o vídeo esteja pronto
+                    video.onloadedmetadata = function() {
+                        console.log('Metadados do vídeo carregados');
+                        video.play();
+                        startBtn.style.display = 'none';
+                        pauseBtn.style.display = 'inline-block';
+                        cameraStatus.textContent = 'Câmera ativa';
+                        cameraStatus.style.color = '#28a745';
+                        
+                        isRunning = true;
+                        
+                        // Iniciar processamento de frames
+                        processingInterval = setInterval(processFrame, 200);
+                    };
+                    
+                } catch (err) {
+                    console.error('Erro detalhado ao acessar a câmera:', err);
+                    cameraStatus.textContent = 'Erro ao acessar a câmera';
+                    cameraStatus.style.color = '#dc3545';
+                    
+                    // Mensagem de erro mais detalhada
+                    if (err.name === 'NotAllowedError') {
+                        showError('Permissão para acessar a câmera foi negada. Por favor, clique no ícone da câmera na barra de endereço e permita o acesso.');
+                    } else if (err.name === 'NotFoundError') {
+                        showError('Nenhuma câmera foi encontrada no seu dispositivo.');
+                    } else if (err.name === 'NotReadableError') {
+                        showError('A câmera está sendo usada por outro aplicativo. Feche outros programas que possam estar usando a câmera.');
+                    } else if (err.name === 'OverconstrainedError') {
+                        // Tentar novamente com configurações mais básicas
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                video: true
+                            });
+                            video.srcObject = stream;
+                            video.style.display = 'block';
+                            
+                            startBtn.style.display = 'none';
+                            pauseBtn.style.display = 'inline-block';
+                            isRunning = true;
+                            processingInterval = setInterval(processFrame, 200);
+                        } catch (retryErr) {
+                            showError('As configurações da câmera não são suportadas pelo seu dispositivo.');
+                        }
+                    } else if (err.name === 'SecurityError') {
+                        showError('O uso da câmera é bloqueado pela política de segurança. Verifique se você está usando HTTPS.');
+                    } else {
+                        showError('Erro ao acessar a câmera: ' + err.message);
+                    }
                 }
-                showDeb
+            });
+            
+            // Função para pausar/retomar
+            pauseBtn.addEventListener('click', function() {
+                if (isRunning) {
+                    clearInterval(processingInterval);
+                    video.pause();
+                    pauseBtn.textContent = 'Retomar';
+                    cameraStatus.textContent = 'Câmera pausada';
+                    cameraStatus.style.color = '#ffc107';
+                    isRunning = false;
+                } else {
+                    video.play();
+                    pauseBtn.textContent = 'Pausar';
+                    cameraStatus.textContent = 'Câmera ativa';
+                    cameraStatus.style.color = '#28a745';
+                    isRunning = true;
+                    processingInterval = setInterval(processFrame, 200);
+                }
+            });
+            
+            // Função para processar o frame atual
+            function processFrame() {
+                if (!isRunning || !stream) return;
+                
+                // Verificar se o vídeo está pronto
+                if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+                
+                // Configurar o canvas com as dimensões do vídeo
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                // Desenhar o frame no canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Obter a imagem como base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.8); // Comprimir para melhorar desempenho
+                
+                // Enviar para o backend
+                fetch('/process_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageData }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro no servidor: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        showError('Erro ao processar imagem: ' + data.error);
+                        return;
+                    }
+                    
+                    // Atualizar a letra detectada
+                    if (data.letter) {
+                        detectedLetter.textContent = data.letter;
+                        recognizedLetter.textContent = data.letter;
+                        
+                        // Verificar se a letra detectada corresponde à letra que deve ser praticada
+                        const activeLetter = document.querySelector('.alphabet-letter.active');
+                        if (activeLetter && activeLetter.dataset.letter === data.letter) {
+                            activeLetter.style.backgroundColor = '#28a745';
+                            setTimeout(() => {
+                                activeLetter.style.backgroundColor = '';
+                                activeLetter.classList.add('active');
+                            }, 1000);
+                        }
+                    }
+                    
+                    // Mostrar a imagem processada se houver
+                    if (data.processed_image) {
+                        processedImage.src = data.processed_image;
+                        processedImage.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao processar o frame:', error);
+                    // Não mostrar todas as mensagens de erro para evitar spam
+                    // showError('Erro ao processar imagem. Verifique a conexão com o servidor.');
+                });
+            }
+            
+            // Adicionar evento de clique às letras do alfabeto
+            alphabetLetters.forEach(letter => {
+                letter.addEventListener('click', function() {
+                    // Remover a classe 'active' de todas as letras
+                    alphabetLetters.forEach(l => {
+                        l.classList.remove('active');
+                        l.style.backgroundColor = '';
+                    });
+                    // Adicionar a classe 'active' à letra clicada
+                    this.classList.add('active');
+                    // Exibir a letra a ser praticada
+                    letterToShow.textContent = `Pratique a letra: ${this.dataset.letter}`;
+                });
+            });
+            
+            // Tentar inicializar a câmera automaticamente
+            if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                console.log('Tentando inicializar câmera automaticamente...');
+                // Opcional: Descomente a linha abaixo se quiser que a câmera inicie automaticamente
+                // startBtn.click();
+            }
+            
+            // Limpar recursos ao sair da página
+            window.addEventListener('beforeunload', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                if (processingInterval) {
+                    clearInterval(processingInterval);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
