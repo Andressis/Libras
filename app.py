@@ -7,9 +7,11 @@ import os
 import base64
 from flask_cors import CORS
 import logging
+import traceback  # Adicionado para melhorar logs de erro
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
+# Configurar logging mais detalhado
+logging.basicConfig(level=logging.INFO, 
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -20,10 +22,20 @@ try:
     # Corrigir o caminho do modelo para usar um caminho absoluto
     model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'keras_model.h5')
     logger.info(f"Tentando carregar modelo de: {model_path}")
-    model = load_model(model_path)
-    logger.info("Modelo carregado com sucesso")
+    
+    # Verificar se o arquivo existe antes de carregar
+    if os.path.exists(model_path):
+        model = load_model(model_path)
+        logger.info("Modelo carregado com sucesso")
+    else:
+        logger.error(f"Arquivo do modelo não encontrado em: {model_path}")
+        # Listar arquivos no diretório para debugging
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        logger.info(f"Arquivos no diretório: {os.listdir(current_dir)}")
+        model = None
 except Exception as e:
     logger.error(f"Erro ao carregar o modelo: {str(e)}")
+    logger.error(traceback.format_exc())  # Adicionado para capturar a stack trace completa
     model = None
 
 mp_hands = mp.solutions.hands
@@ -33,19 +45,45 @@ classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I', 'L', 'M', 'N', 'O', 'P', 'R',
 # Variável global para armazenar a letra reconhecida mais recente
 current_letter = ""
 
-# Rota para verificar o status do servidor
+# Rota para verificar o status do servidor e do modelo
 @app.route('/status')
 def status():
-    return jsonify({
-        'status': 'ok',
-        'model_loaded': model is not None,
-        'classes': classes
-    })
+    try:
+        # Verificação mais detalhada do modelo
+        model_check = model is not None
+        model_info = {}
+        if model_check:
+            model_info = {
+                "summary": str(model.summary),
+                "config": str(model.get_config())[:100] + "..." # Apenas parte da configuração para não sobrecarregar
+            }
+            
+        return jsonify({
+            'status': 'ok',
+            'model_loaded': model_check,
+            'model_info': model_info,
+            'classes': classes,
+            'working_dir': os.getcwd(),
+            'config_path': model_path if 'model_path' in locals() else "Não definido"
+        })
+    except Exception as e:
+        logger.error(f"Erro na rota de status: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 # Rota para o index.html
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Erro ao renderizar index.html: {str(e)}")
+        # Se o template não for encontrado, retorne o HTML diretamente
+        with open('index.html', 'r') as file:
+            return file.read()
 
 # Rota para processar frames recebidos do frontend e reconhecer letras
 @app.route('/process_frame', methods=['POST'])
@@ -59,7 +97,13 @@ def process_frame():
             logger.warning("Dados da imagem não recebidos corretamente")
             return jsonify({'error': 'Dados de imagem não encontrados'}), 400
             
-        encoded_data = data['image'].split(',')[1]
+        # Separar o cabeçalho do base64 se existir
+        image_data = data['image']
+        if ',' in image_data:
+            encoded_data = image_data.split(',')[1]
+        else:
+            encoded_data = image_data
+            
         nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
@@ -92,25 +136,37 @@ def process_frame():
                 cv2.rectangle(processed_image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
                 hand_detected = True
                 
-                imgCrop = img[y_min:y_max, x_min:x_max]
-                if imgCrop.size != 0 and model is not None:
-                    imgCrop = cv2.resize(imgCrop, (224, 224))
-                    imgArray = np.asarray(imgCrop)
-                    normalized_image_array = (imgArray.astype(np.float32) / 127.0) - 1
-                    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-                    data[0] = normalized_image_array
-                    prediction = model.predict(data, verbose=0)
-                    indexVal = np.argmax(prediction)
-                    
-                    # Atualizar a letra reconhecida
-                    current_letter = classes[indexVal]
-                    
-                    # Adicionar letra vermelha acima do retângulo verde
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    text_x = x_min + int((x_max - x_min) / 2) - 20
-                    text_y = y_min - 30
-                    cv2.putText(processed_image, current_letter, (text_x, text_y), 
-                               font, 3, (0, 0, 255), 5, cv2.LINE_AA)
+                # Se o modelo não estiver disponível, não tente predizer
+                if model is None:
+                    current_letter = "MODELO NÃO CARREGADO"
+                    logger.warning("Tentativa de predição sem modelo carregado")
+                    cv2.putText(processed_image, "MODELO NÃO CARREGADO", (10, 30), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                else:
+                    imgCrop = img[y_min:y_max, x_min:x_max]
+                    if imgCrop.size != 0:
+                        imgCrop = cv2.resize(imgCrop, (224, 224))
+                        imgArray = np.asarray(imgCrop)
+                        normalized_image_array = (imgArray.astype(np.float32) / 127.0) - 1
+                        data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+                        data[0] = normalized_image_array
+                        
+                        try:
+                            prediction = model.predict(data, verbose=0)
+                            indexVal = np.argmax(prediction)
+                            
+                            # Atualizar a letra reconhecida
+                            current_letter = classes[indexVal]
+                            
+                            # Adicionar letra vermelha acima do retângulo verde
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            text_x = x_min + int((x_max - x_min) / 2) - 20
+                            text_y = y_min - 30
+                            cv2.putText(processed_image, current_letter, (text_x, text_y), 
+                                       font, 3, (0, 0, 255), 5, cv2.LINE_AA)
+                        except Exception as e:
+                            logger.error(f"Erro na predição: {str(e)}")
+                            current_letter = "ERRO"
         
         # Converter a imagem processada para base64 para enviar de volta ao front-end
         _, buffer = cv2.imencode('.jpg', processed_image)
@@ -124,7 +180,11 @@ def process_frame():
     
     except Exception as e:
         logger.error(f"Erro no processamento do frame: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 # Rota para obter a letra reconhecida atual
 @app.route('/get_letter')
