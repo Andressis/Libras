@@ -1,3 +1,4 @@
+# Imagem base do Python 3.10
 FROM python:3.10-slim
 
 # Variáveis de ambiente
@@ -7,8 +8,13 @@ ENV PYTHONUNBUFFERED=1
 # Diretório da aplicação
 WORKDIR /app
 
-# Instalar dependências do sistema necessárias ao OpenCV
-RUN apt-get update && apt-get install -y libgl1-mesa-glx
+# Instalar dependências do sistema necessárias para o OpenCV
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1
 
 # Instalar dependências Python
 COPY requirements.txt .
