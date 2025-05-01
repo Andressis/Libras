@@ -7,7 +7,10 @@ ENV PYTHONUNBUFFERED=1
 # Diretório da aplicação
 WORKDIR /app
 
-# Instalar dependências
+# Instalar dependências do sistema necessárias ao OpenCV
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+
+# Instalar dependências Python
 COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
