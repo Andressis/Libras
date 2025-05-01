@@ -1,0 +1,10 @@
+# Evitar dependências desnecessárias
+matplotlib==0
+jax==0
+jaxlib==0
+h5py==0
+pillow==0
+sounddevice==0
+tensorflow-io-gcs-filesystem==0
+tensorboard==0
+tensorflow-estimator==0
