@@ -8,13 +8,16 @@ ENV PYTHONUNBUFFERED=1
 # Diretório da aplicação
 WORKDIR /app
 
-# Instalar dependências do sistema necessárias para o OpenCV
+# Instalar dependências do sistema necessárias para o OpenCV e para compilação
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender1
+    libxrender1 \
+    build-essential \
+    python3-dev \
+    && apt-get clean
 
 # Instalar dependências Python
 COPY requirements.txt .
