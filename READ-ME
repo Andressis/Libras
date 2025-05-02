@@ -1,0 +1,11 @@
+Este projeto é um site desenvolvido em **Python** tem como objetivo realizar o **reconhecimento dos sinais manuais do alfabeto em Libras (Língua Brasileira de Sinais)**.
+
+## 📌 Funcionalidades
+
+- Interface web para visualização e interação.
+- Reconhecimento de gestos com as mãos correspondentes ao alfabeto da Libras.
+- Processamento em tempo real através de câmera
+- Backend leve e eficiente usando Flask.
+
+
+Desenvolvido para o projeto integrado do 5° periodo da Gran Faculdade.
