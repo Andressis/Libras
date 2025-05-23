@@ -6,99 +6,28 @@
     <meta http-equiv="permissions-policy" content="camera=*, microphone=*">
     <title>Reconhecimento do Alfabeto em Libras</title>
     <style>
-        :root {
-            --bg-color: #f5f5f5;
-            --container-bg: white;
-            --text-color: #333;
-            --border-color: #0066cc;
-            --button-bg: #6c757d;
-            --button-hover: #5a6268;
-            --success-color: #28a745;
-            --error-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-bg: #f0f8ff;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --container-bg: #2d2d2d;
-            --text-color: #e0e0e0;
-            --border-color: #4da6ff;
-            --button-bg: #495057;
-            --button-hover: #6c757d;
-            --success-color: #20c997;
-            --error-color: #e74c3c;
-            --warning-color: #f39c12;
-            --info-bg: #2c3e50;
-        }
-
-        * {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
+            max-width: 900px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            gap: 20px;
+            background-color: #f5f5f5;
         }
-
-        .sidebar {
-            width: 280px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-
-        .main-content {
-            flex: 1;
-            max-width: 800px;
-        }
-
         .container {
-            background-color: var(--container-bg);
+            background-color: white;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-
-        .sidebar .container {
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
         header {
             text-align: center;
-            color: var(--border-color);
+            color: #0066cc;
         }
-
         header p {
-            color: var(--text-color);
-            opacity: 0.8;
+            color: #666;
             margin-top: -10px;
         }
-
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--button-bg);
-            color: var(--container-bg);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .theme-toggle:hover {
-            background: var(--button-hover);
-        }
-
         .video-container {
             width: 100%;
             background-color: #000;
@@ -108,29 +37,25 @@
             margin: 20px 0;
             position: relative;
         }
-
         #video {
             width: 100%;
             height: auto;
             max-height: 400px;
             border-radius: 5px;
         }
-
         .camera-status {
             text-align: center;
-            color: var(--success-color);
+            color: #28a745;
             margin: 10px 0;
             font-weight: 500;
         }
-
         .btn-container {
             text-align: center;
             margin: 10px 0;
         }
-
         .btn {
-            background-color: var(--button-bg);
-            color: var(--container-bg);
+            background-color: #6c757d;
+            color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 4px;
@@ -138,346 +63,195 @@
             font-size: 14px;
             margin: 0 5px;
         }
-
         .btn:hover {
-            background-color: var(--button-hover);
+            background-color: #5a6268;
         }
-
-        .btn.listening {
-            background-color: var(--success-color);
-            animation: pulse 2s infinite;
-        }
-
-        .btn.listening:hover {
-            background-color: #218838;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
         .letter-display {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 20px 0;
         }
-
         .letter-box {
             width: 80px;
             height: 80px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px solid var(--border-color);
+            border: 2px solid #0066cc;
             border-radius: 8px;
             font-size: 48px;
             font-weight: bold;
-            color: var(--border-color);
+            color: #0066cc;
             margin-bottom: 10px;
         }
-
         .letter-instruction {
             text-align: center;
             margin-bottom: 5px;
         }
-
         .letter-recognized {
             font-weight: bold;
-            color: var(--text-color);
+            color: #333;
         }
-
         .instructions {
-            background-color: var(--info-bg);
+            background-color: #f0f8ff;
             padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
         }
-
         .instructions h2 {
-            color: var(--border-color);
+            color: #0066cc;
             margin-top: 0;
         }
-
         .instructions ol {
             padding-left: 25px;
         }
-
         .instructions li {
             margin-bottom: 10px;
-            color: var(--text-color);
+            color: #444;
         }
-
+        .alphabet-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .alphabet-letter {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #0066cc;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #0066cc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .alphabet-letter:hover {
+            background-color: #e6f0ff;
+        }
+        .alphabet-letter.active {
+            background-color: #0066cc;
+            color: white;
+        }
         .footer {
             text-align: center;
-            color: var(--text-color);
-            opacity: 0.7;
+            color: #666;
             font-size: 14px;
             margin-top: 30px;
         }
-
+        #letterToShow {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
         #recognizedLetter {
             font-weight: bold;
             font-size: 20px;
         }
-
         .error-message {
-            color: var(--error-color);
-            background-color: rgba(220, 53, 69, 0.1);
-            border: 1px solid var(--error-color);
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
             border-radius: 5px;
             padding: 10px;
             margin: 10px 0;
             display: none;
         }
-
         #serverStatus {
-            background-color: rgba(40, 167, 69, 0.1);
-            border: 1px solid var(--success-color);
+            background-color: #e2f3e2;
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
             display: none;
         }
-
         #https-warning {
-            color: var(--warning-color);
-            background-color: rgba(255, 193, 7, 0.1);
-            border: 1px solid var(--warning-color);
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
             border-radius: 5px;
             padding: 10px;
             margin: 10px 0;
             text-align: center;
             display: none;
-        }
-
-        .history-container {
-            background-color: var(--info-bg);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .history-title {
-            color: var(--border-color);
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px;
-        }
-
-        .history-list {
-            max-height: 300px;
-            overflow-y: auto;
-            font-size: 14px;
-        }
-
-        .history-item {
-            padding: 8px 12px;
-            margin: 5px 0;
-            background-color: var(--container-bg);
-            border-radius: 5px;
-            border-left: 3px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .history-letter {
-            font-weight: bold;
-            font-size: 18px;
-            color: var(--border-color);
-            min-width: 25px;
-        }
-
-        .history-time {
-            font-size: 11px;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .clear-history-btn {
-            background-color: var(--error-color);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .clear-history-btn:hover {
-            background-color: #c82333;
-        }
-
-        .listening-mode {
-            background-color: rgba(40, 167, 69, 0.1);
-            border: 1px solid var(--success-color);
-            border-radius: 5px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .listening-mode.active {
-            background-color: rgba(23, 162, 184, 0.1);
-            border-color: #17a2b8;
-        }
-
-        .current-letter-info {
-            background-color: var(--info-bg);
-            padding: 12px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .timer-display {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--border-color);
-            margin: 8px 0;
-        }
-
-        .stats-container {
-            background-color: var(--info-bg);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .stats-title {
-            color: var(--border-color);
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: var(--border-color);
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                padding: 10px;
-            }
-            
-            .sidebar {
-                width: 100%;
-                position: relative;
-                top: 0;
-            }
-            
-            .theme-toggle {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin-bottom: 15px;
-            }
         }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle">🌙 Modo Escuro</button>
+    <div class="container">
+        <header>
+            <h1>Reconhecimento do Alfabeto em Libras</h1>
+            <p>Aprenda e pratique o alfabeto da Língua Brasileira de Sinais</p>
+        </header>
 
-    <div class="sidebar">
-        <div class="stats-container">
-            <div class="stats-title">📊 Estatísticas</div>
-            <div class="stat-item">
-                <span>Letras detectadas:</span>
-                <span class="stat-value" id="totalDetections">0</span>
-            </div>
-            <div class="stat-item">
-                <span>Sessão ativa:</span>
-                <span class="stat-value" id="sessionTime">00:00</span>
-            </div>
+        <div id="https-warning"></div>
+        <div id="serverStatus"></div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <img id="processedImage" style="width: 100%; height: auto; max-height: 400px; border-radius: 5px;" alt="Imagem processada">
         </div>
 
-        <div class="history-container">
-            <div class="history-title">
-                <span>📝 Histórico</span>
-                <button class="clear-history-btn" id="clearHistoryBtn">Limpar</button>
-            </div>
-            <div class="history-list" id="historyList">
-                <div style="text-align: center; color: var(--text-color); opacity: 0.7; padding: 20px; font-size: 13px;">
-                    Nenhuma detecção ainda
-                </div>
-            </div>
+        <div class="camera-status" id="cameraStatus">Aguardando câmera...</div>
+
+        <div class="btn-container">
+            <button id="startBtn" class="btn">Iniciar Reconhecimento</button>
+            <button id="pauseBtn" class="btn" style="display: none;">Pausar</button>
+            <button id="testConnectionBtn" class="btn">Verificar Conexão</button>
         </div>
 
-        <div class="current-letter-info" id="currentLetterInfo" style="display: none;">
-            <div>Detectando: <strong id="currentDetectedLetter">-</strong></div>
-            <div class="timer-display" id="timerDisplay">0:10</div>
-            <div style="font-size: 11px; opacity: 0.8; margin-top: 5px;">
-                Aguardando confirmação...
-            </div>
+        <div class="letter-display">
+            <div class="letter-box" id="detectedLetter"></div>
+            <div class="letter-instruction">Faça um sinal para reconhecer</div>
+            <div class="letter-recognized">Letra reconhecida: <span id="recognizedLetter"></span></div>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="container">
-            <header>
-                <h1>Reconhecimento do Alfabeto em Libras</h1>
-                <p>Aprenda e pratique o alfabeto da Língua Brasileira de Sinais</p>
-            </header>
+    <div class="container instructions">
+        <h2>Como usar:</h2>
+        <ol>
+            <li>Clique em "Iniciar Reconhecimento" para ativar a câmera</li>
+            <li>Posicione sua mão no centro da imagem</li>
+            <li>Faça os sinais do alfabeto em Libras</li>
+            <li>A letra correspondente será exibida na tela</li>
+            <li>Use o grid abaixo para praticar todas as letras</li>
+        </ol>
+    </div>
 
-            <div id="https-warning"></div>
-            <div id="serverStatus"></div>
-            <div class="error-message" id="errorMessage"></div>
-
-            <div class="video-container">
-                <video id="video" autoplay playsinline></video>
-                <canvas id="canvas" style="display: none;"></canvas>
-                <img id="processedImage" style="width: 100%; height: auto; max-height: 400px; border-radius: 5px;" alt="Imagem processada">
-            </div>
-
-            <div class="camera-status" id="cameraStatus">Aguardando câmera...</div>
-
-            <div class="btn-container">
-                <button id="startBtn" class="btn">Iniciar Reconhecimento</button>
-                <button id="pauseBtn" class="btn" style="display: none;">Pausar</button>
-                <button id="listeningBtn" class="btn">Modo Escuta</button>
-                <button id="testConnectionBtn" class="btn">Verificar Conexão</button>
-            </div>
-
-            <div class="listening-mode" id="listeningMode" style="display: none;">
-                <h3>🎯 Modo Escuta Ativo</h3>
-                <p>Sistema monitorando sinais continuamente</p>
-            </div>
-
-            <div class="letter-display">
-                <div class="letter-box" id="detectedLetter"></div>
-                <div class="letter-instruction">Faça um sinal para reconhecer</div>
-                <div class="letter-recognized">Letra reconhecida: <span id="recognizedLetter"></span></div>
-            </div>
+    <div class="container">
+        <h3 style="text-align: center;">Escolha uma letra para praticar:</h3>
+        <div id="letterToShow"></div>
+        <div class="alphabet-grid">
+            <div class="alphabet-letter" data-letter="A">A</div>
+            <div class="alphabet-letter" data-letter="B">B</div>
+            <div class="alphabet-letter" data-letter="C">C</div>
+            <div class="alphabet-letter" data-letter="D">D</div>
+            <div class="alphabet-letter" data-letter="E">E</div>
+            <div class="alphabet-letter" data-letter="F">F</div>
+            <div class="alphabet-letter" data-letter="G">G</div>
+            <div class="alphabet-letter" data-letter="I">I</div>
+            <div class="alphabet-letter" data-letter="L">L</div>
+            <div class="alphabet-letter" data-letter="M">M</div>
+            <div class="alphabet-letter" data-letter="N">N</div>
+            <div class="alphabet-letter" data-letter="O">O</div>
+            <div class="alphabet-letter" data-letter="P">P</div>
+            <div class="alphabet-letter" data-letter="R">R</div>
+            <div class="alphabet-letter" data-letter="S">S</div>
+            <div class="alphabet-letter" data-letter="T">T</div>
+            <div class="alphabet-letter" data-letter="U">U</div>
+            <div class="alphabet-letter" data-letter="V">V</div>
+            <div class="alphabet-letter" data-letter="W">W</div>
         </div>
+    </div>
 
-        <div class="container instructions">
-            <h2>Como usar:</h2>
-            <ol>
-                <li>Clique em "Iniciar Reconhecimento" para ativar a câmera</li>
-                <li>Ative o "Modo Escuta" para monitoramento contínuo</li>
-                <li>Posicione sua mão no centro da imagem</li>
-                <li>Faça os sinais do alfabeto em Libras</li>
-                <li>As detecções serão salvas no histórico após 5 minutos de confirmação</li>
-            </ol>
-        </div>
-
-        <div class="footer">
-            Desenvolvido por André Vitor, Sarah Ramos e Julio Cesar
-        </div>
+    <div class="footer">
+        Desenvolvido por André Vitor, Sarah Ramos e Julio Cesar
     </div>
 
     <script>
@@ -487,72 +261,32 @@
             const processedImage = document.getElementById('processedImage');
             const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
-            const listeningBtn = document.getElementById('listeningBtn');
             const testConnectionBtn = document.getElementById('testConnectionBtn');
             const detectedLetter = document.getElementById('detectedLetter');
             const recognizedLetter = document.getElementById('recognizedLetter');
+            const letterToShow = document.getElementById('letterToShow');
+            const alphabetLetters = document.querySelectorAll('.alphabet-letter');
             const cameraStatus = document.getElementById('cameraStatus');
             const errorMessage = document.getElementById('errorMessage');
             const serverStatus = document.getElementById('serverStatus');
             const httpsWarning = document.getElementById('https-warning');
-            const listeningMode = document.getElementById('listeningMode');
-            const currentLetterInfo = document.getElementById('currentLetterInfo');
-            const currentDetectedLetter = document.getElementById('currentDetectedLetter');
-            const timerDisplay = document.getElementById('timerDisplay');
-            const historyList = document.getElementById('historyList');
-            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-            const themeToggle = document.getElementById('themeToggle');
-            const totalDetections = document.getElementById('totalDetections');
-            const sessionTime = document.getElementById('sessionTime');
             
             let isRunning = false;
-            let isListening = false;
             let stream = null;
             let processingInterval = null;
-            let sessionStart = null;
-            let sessionTimer = null;
             
-            // Sistema de histórico e timer
-            let currentLetter = null;
-            let letterStartTime = null;
-            let letterTimer = null;
-            let detectionHistory = []; // Histórico normal de detecções
-            let detectionCount = 0;
-            
-            const CONFIRMATION_TIME = 10 * 1000; // 10 segundos
-            
-            // Tema
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ Modo Claro';
-            }
-            
-            // Event Listeners
-            themeToggle.addEventListener('click', toggleTheme);
-            testConnectionBtn.addEventListener('click', checkServerStatus);
-            startBtn.addEventListener('click', startCamera);
-            pauseBtn.addEventListener('click', togglePause);
-            listeningBtn.addEventListener('click', toggleListening);
-            clearHistoryBtn.addEventListener('click', clearHistory);
-            
-            // Verificar HTTPS
+            // Verificar se estamos em HTTPS
             if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
                 httpsWarning.textContent = 'Este site precisa ser acessado via HTTPS para permitir o uso da câmera. Tente usar "https://" no início da URL.';
                 httpsWarning.style.display = 'block';
+                console.warn('Protocolo inseguro detectado:', location.protocol);
             }
             
+            // Verificar status do servidor ao carregar a página
             checkServerStatus();
             
-            function toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                themeToggle.textContent = newTheme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Escuro';
-            }
+            // Função para verificar o status do servidor
+            testConnectionBtn.addEventListener('click', checkServerStatus);
             
             function checkServerStatus() {
                 fetch('/status')
@@ -564,266 +298,222 @@
                             Modelo carregado: ${data.model_loaded ? 'Sim' : 'Não'} <br>
                             Classes disponíveis: ${data.classes ? data.classes.length : 0}
                         `;
+                        serverStatus.style.backgroundColor = '#d4edda';
                     })
                     .catch(error => {
                         serverStatus.style.display = 'block';
-                        serverStatus.textContent = 'Erro ao conectar com o servidor.';
-                        console.error('Erro:', error);
+                        serverStatus.textContent = 'Erro ao conectar com o servidor. Verifique se o serviço está rodando.';
+                        serverStatus.style.backgroundColor = '#f8d7da';
+                        console.error('Erro ao verificar status do servidor:', error);
                     });
             }
             
+            // Função para exibir mensagem de erro
             function showError(message) {
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'block';
                 setTimeout(() => {
                     errorMessage.style.display = 'none';
-                }, 5000);
+                }, 8000); // Aumentado para 8 segundos para dar mais tempo para o usuário ler
             }
             
-            async function startCamera() {
+            // Função para iniciar a câmera - versão melhorada
+            startBtn.addEventListener('click', async function() {
                 try {
-                    if (!navigator.mediaDevices?.getUserMedia) {
-                        showError('Seu navegador não suporta acesso à câmera.');
+                    // Verificar se o navegador suporta a API MediaDevices
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        showError('Seu navegador não suporta o acesso à câmera. Use um navegador moderno como Chrome, Firefox ou Edge.');
                         return;
                     }
                     
+                    // Verificar explicitamente se estamos em HTTPS
+                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        showError('O acesso à câmera requer uma conexão segura (HTTPS). Tente acessar o site com "https://" no início da URL.');
+                        console.error('Protocolo inseguro detectado:', location.protocol);
+                        return;
+                    }
+                    
+                    console.log('Solicitando acesso à câmera...');
+                    
+                    // Tentar acessar a câmera com configurações mais permissivas
                     stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: true,
+                        video: true,  // Simplificado para maior compatibilidade
                         audio: false
                     });
                     
+                    console.log('Câmera acessada com sucesso!', stream);
+                    
                     video.srcObject = stream;
                     video.style.display = 'block';
-                    processedImage.style.display = 'none';
+                    processedImage.style.display = 'none'; // Esconder a imagem processada inicialmente
                     
+                    // Garantir que o vídeo esteja pronto
                     video.onloadedmetadata = function() {
+                        console.log('Metadados do vídeo carregados');
                         video.play();
                         startBtn.style.display = 'none';
                         pauseBtn.style.display = 'inline-block';
                         cameraStatus.textContent = 'Câmera ativa';
+                        cameraStatus.style.color = '#28a745';
                         
                         isRunning = true;
-                        sessionStart = Date.now();
+                        
+                        // Iniciar processamento de frames
                         processingInterval = setInterval(processFrame, 200);
-                        sessionTimer = setInterval(updateSessionTime, 1000);
                     };
                     
                 } catch (err) {
-                    console.error('Erro ao acessar câmera:', err);
+                    console.error('Erro detalhado ao acessar a câmera:', err);
                     cameraStatus.textContent = 'Erro ao acessar a câmera';
-                    cameraStatus.style.color = 'var(--error-color)';
+                    cameraStatus.style.color = '#dc3545';
                     
+                    // Mensagem de erro mais detalhada
                     if (err.name === 'NotAllowedError') {
-                        showError('Permissão negada para acessar a câmera.');
+                        showError('Permissão para acessar a câmera foi negada. Por favor, clique no ícone da câmera na barra de endereço e permita o acesso.');
+                    } else if (err.name === 'NotFoundError') {
+                        showError('Nenhuma câmera foi encontrada no seu dispositivo.');
+                    } else if (err.name === 'NotReadableError') {
+                        showError('A câmera está sendo usada por outro aplicativo. Feche outros programas que possam estar usando a câmera.');
+                    } else if (err.name === 'OverconstrainedError') {
+                        // Tentar novamente com configurações mais básicas
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                video: true
+                            });
+                            video.srcObject = stream;
+                            video.style.display = 'block';
+                            
+                            startBtn.style.display = 'none';
+                            pauseBtn.style.display = 'inline-block';
+                            isRunning = true;
+                            processingInterval = setInterval(processFrame, 200);
+                        } catch (retryErr) {
+                            showError('As configurações da câmera não são suportadas pelo seu dispositivo.');
+                        }
+                    } else if (err.name === 'SecurityError') {
+                        showError('O uso da câmera é bloqueado pela política de segurança. Verifique se você está usando HTTPS.');
                     } else {
                         showError('Erro ao acessar a câmera: ' + err.message);
                     }
                 }
-            }
+            });
             
-            function togglePause() {
+            // Função para pausar/retomar
+            pauseBtn.addEventListener('click', function() {
                 if (isRunning) {
                     clearInterval(processingInterval);
-                    clearInterval(sessionTimer);
                     video.pause();
                     pauseBtn.textContent = 'Retomar';
                     cameraStatus.textContent = 'Câmera pausada';
+                    cameraStatus.style.color = '#ffc107';
                     isRunning = false;
-                    
-                    if (letterTimer) clearInterval(letterTimer);
                 } else {
                     video.play();
                     pauseBtn.textContent = 'Pausar';
                     cameraStatus.textContent = 'Câmera ativa';
+                    cameraStatus.style.color = '#28a745';
                     isRunning = true;
                     processingInterval = setInterval(processFrame, 200);
-                    sessionTimer = setInterval(updateSessionTime, 1000);
-                    
-                    if (currentLetter && letterStartTime) {
-                        startLetterTimer(currentLetter, letterStartTime);
-                    }
                 }
-            }
+            });
             
-            function toggleListening() {
-                isListening = !isListening;
-                
-                if (isListening) {
-                    listeningBtn.textContent = 'Parar Escuta';
-                    listeningBtn.classList.add('listening');
-                    listeningMode.style.display = 'block';
-                } else {
-                    listeningBtn.textContent = 'Modo Escuta';
-                    listeningBtn.classList.remove('listening');
-                    listeningMode.style.display = 'none';
-                    resetCurrentLetter();
-                }
-            }
-            
-            function updateSessionTime() {
-                if (!sessionStart) return;
-                
-                const elapsed = Date.now() - sessionStart;
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                sessionTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
+            // Função para processar o frame atual
             function processFrame() {
-                if (!isRunning || !stream || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+                if (!isRunning || !stream) return;
                 
+                // Verificar se o vídeo está pronto
+                if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+                
+                // Configurar o canvas com as dimensões do vídeo
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 
+                // Desenhar o frame no canvas
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                // Obter a imagem como base64
+                const imageData = canvas.toDataURL('image/jpeg', 0.8); // Comprimir para melhorar desempenho
                 
+                // Enviar para o backend
                 fetch('/process_frame', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({ image: imageData }),
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro no servidor: ' + response.statusText);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.error) {
-                        showError('Erro: ' + data.error);
+                        showError('Erro ao processar imagem: ' + data.error);
                         return;
                     }
                     
+                    // Atualizar a letra detectada
                     if (data.letter) {
                         detectedLetter.textContent = data.letter;
                         recognizedLetter.textContent = data.letter;
                         
-                        // Adicionar ao histórico imediatamente (detecção simples)
-                        addToHistory(data.letter);
-                        
-                        // Sistema de confirmação no modo escuta
-                        if (isListening) {
-                            handleLetterDetection(data.letter);
+                        // Verificar se a letra detectada corresponde à letra que deve ser praticada
+                        const activeLetter = document.querySelector('.alphabet-letter.active');
+                        if (activeLetter && activeLetter.dataset.letter === data.letter) {
+                            activeLetter.style.backgroundColor = '#28a745';
+                            setTimeout(() => {
+                                activeLetter.style.backgroundColor = '';
+                                activeLetter.classList.add('active');
+                            }, 1000);
                         }
                     }
                     
+                    // Mostrar a imagem processada se houver
                     if (data.processed_image) {
                         processedImage.src = data.processed_image;
                         processedImage.style.display = 'block';
                     }
                 })
                 .catch(error => {
-                    console.error('Erro ao processar frame:', error);
+                    console.error('Erro ao processar o frame:', error);
+                    // Não mostrar todas as mensagens de erro para evitar spam
+                    // showError('Erro ao processar imagem. Verifique a conexão com o servidor.');
                 });
             }
             
-            function handleLetterDetection(letter) {
-                if (currentLetter !== letter) {
-                    resetCurrentLetter();
-                    
-                    currentLetter = letter;
-                    letterStartTime = Date.now();
-                    currentDetectedLetter.textContent = letter;
-                    currentLetterInfo.style.display = 'block';
-                    
-                    startLetterTimer(letter, letterStartTime);
-                }
+            // Adicionar evento de clique às letras do alfabeto
+            alphabetLetters.forEach(letter => {
+                letter.addEventListener('click', function() {
+                    // Remover a classe 'active' de todas as letras
+                    alphabetLetters.forEach(l => {
+                        l.classList.remove('active');
+                        l.style.backgroundColor = '';
+                    });
+                    // Adicionar a classe 'active' à letra clicada
+                    this.classList.add('active');
+                    // Exibir a letra a ser praticada
+                    letterToShow.textContent = `Pratique a letra: ${this.dataset.letter}`;
+                });
+            });
+            
+            // Tentar inicializar a câmera automaticamente
+            if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                console.log('Tentando inicializar câmera automaticamente...');
+                // Opcional: Descomente a linha abaixo se quiser que a câmera inicie automaticamente
+                // startBtn.click();
             }
             
-            function startLetterTimer(letter, startTime) {
-                if (letterTimer) clearInterval(letterTimer);
-                
-                letterTimer = setInterval(() => {
-                    const elapsed = Date.now() - startTime;
-                    const remaining = CONFIRMATION_TIME - elapsed;
-                    
-                    if (remaining <= 0) {
-                        // Confirmação após 5 minutos
-                        addConfirmedToHistory(letter);
-                        resetCurrentLetter();
-                    } else {
-                        const minutes = Math.floor(remaining / 60000);
-                        const seconds = Math.floor((remaining % 60000) / 1000);
-                        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    }
-                }, 1000);
-            }
-            
-            function resetCurrentLetter() {
-                if (letterTimer) {
-                    clearInterval(letterTimer);
-                    letterTimer = null;
-                }
-                currentLetter = null;
-                letterStartTime = null;
-                currentLetterInfo.style.display = 'none';
-            }
-            
-            function addToHistory(letter) {
-                detectionCount++;
-                totalDetections.textContent = detectionCount;
-                
-                const historyItem = {
-                    letter: letter,
-                    timestamp: Date.now(),
-                    time: new Date().toLocaleTimeString('pt-BR'),
-                    confirmed: false
-                };
-                
-                detectionHistory.unshift(historyItem); // Adiciona no início
-                
-                // Manter apenas os últimos 50 itens
-                if (detectionHistory.length > 50) {
-                    detectionHistory = detectionHistory.slice(0, 50);
-                }
-                
-                updateHistoryDisplay();
-            }
-            
-            function addConfirmedToHistory(letter) {
-                const confirmedItem = {
-                    letter: letter,
-                    timestamp: Date.now(),
-                    time: new Date().toLocaleTimeString('pt-BR'),
-                    confirmed: true
-                };
-                
-                detectionHistory.unshift(confirmedItem);
-                updateHistoryDisplay();
-                
-                showError(`✅ Letra "${letter}" confirmada após 5 minutos!`);
-            }
-            
-            function updateHistoryDisplay() {
-                if (detectionHistory.length === 0) {
-                    historyList.innerHTML = '<div style="text-align: center; color: var(--text-color); opacity: 0.7; padding: 20px; font-size: 13px;">Nenhuma detecção ainda</div>';
-                    return;
-                }
-                
-                historyList.innerHTML = detectionHistory.map(item => `
-                    <div class="history-item">
-                        <div class="history-letter">${item.letter}</div>
-                        <div>
-                            <div class="history-time">${item.time}</div>
-                            ${item.confirmed ? '<div style="color: var(--success-color); font-size: 10px;">✓ Confirmada</div>' : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            function clearHistory() {
-                if (confirm('Limpar histórico de detecções?')) {
-                    detectionHistory = [];
-                    detectionCount = 0;
-                    totalDetections.textContent = '0';
-                    updateHistoryDisplay();
-                }
-            }
-            
-            // Limpar recursos ao sair
+            // Limpar recursos ao sair da página
             window.addEventListener('beforeunload', function() {
-                if (stream) stream.getTracks().forEach(track => track.stop());
-                if (processingInterval) clearInterval(processingInterval);
-                if (sessionTimer) clearInterval(sessionTimer);
-                if (letterTimer) clearInterval(letterTimer);
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                if (processingInterval) {
+                    clearInterval(processingInterval);
+                }
             });
         });
     </script>
