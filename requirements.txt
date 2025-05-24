@@ -2,8 +2,8 @@ Flask==2.2.3
 flask-cors==5.0.1
 gunicorn==20.1.0
 Werkzeug<2.3
-numpy==1.21.6
+numpy==1.24.3
 mediapipe==0.10.11
-tensorflow-cpu==2.11.0
-opencv-python-headless==4.6.0.66
-protobuf==3.20.3
+tensorflow-cpu==2.13.0
+opencv-python-headless==4.8.0.76
+protobuf>=3.11,<4
