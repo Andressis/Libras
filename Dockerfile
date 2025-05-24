@@ -1,5 +1,5 @@
 # Imagem base do Python 3.10 slim (leve, mas requer libs extras)
-FROM python:3.10-slim
+FROM python:3.10
 
 # Evita prompts interativos durante a instalação
 ENV DEBIAN_FRONTEND=noninteractive
