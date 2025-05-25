@@ -629,7 +629,7 @@
 
         <div class="current-letter-info" id="currentLetterInfo" style="display: none;">
             <div>Detectando: <strong id="currentDetectedLetter">-</strong></div>
-            <div class="timer-display" id="timerDisplay">5:00</div>
+            <div class="timer-display" id="timerDisplay">2:00</div>
             <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
                 Aguardando confirmação...
             </div>
@@ -678,7 +678,7 @@
             let detectionCount = 0;
             let uniqueLetters = new Set(); // Para contar letras únicas
             
-            const CONFIRMATION_TIME_MS = 5000; // 5 segundos para confirmar a letra
+            const CONFIRMATION_TIME_MS = 2000; // 2 segundos para confirmar a letra
             
             // Tema
             const savedTheme = localStorage.getItem('theme') || 'light';
