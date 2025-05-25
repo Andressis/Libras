@@ -165,14 +165,6 @@
             background-color: #218838;
         }
 
-        .btn.alphabet-btn {
-            background-color: var(--border-color);
-        }
-
-        .btn.alphabet-btn:hover {
-            background-color: #0056b3;
-        }
-
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.7; }
@@ -269,7 +261,7 @@
             text-align: center;
         }
 
-        #httpsWarning {
+        #https-warning {
             color: var(--warning-color);
             background-color: rgba(255, 193, 7, 0.1);
             border: 1px solid var(--warning-color);
@@ -405,83 +397,6 @@
             color: var(--border-color);
         }
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            position: relative;
-            background-color: var(--container-bg);
-            margin: 2% auto;
-            padding: 20px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .modal-title {
-            color: var(--border-color);
-            font-size: 24px;
-            margin: 0;
-        }
-
-        .close-btn {
-            background: var(--error-color);
-            color: white;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-btn:hover {
-            background: #c82333;
-        }
-
-        .alphabet-image {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            background-color: white;
-        }
-
-        .alphabet-description {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: var(--info-bg);
-            border-radius: 8px;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             body {
@@ -554,16 +469,6 @@
             
             .history-letter {
                 font-size: 18px;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 5% auto;
-                padding: 15px;
-            }
-
-            .modal-title {
-                font-size: 20px;
             }
         }
 
@@ -640,29 +545,6 @@
     
     <div class="notification" id="notification"></div>
 
-    <!-- Modal do Alfabeto -->
-    <div class="modal" id="alphabetModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">📚 Alfabeto em Libras</h2>
-                <button class="close-btn" id="closeModal">&times;</button>
-            </div>
-            <!-- Imagem simulada do alfabeto em Libras -->
-            <div>
-                <img src="alfabeto-libras.png" alt="Alfabeto em Libras"
-                style="max-width: 100%; max-height: 80vh; display: block; margin: 0 auto; border-radius: 8px; border: 2px solid var(--border-color);" />
-            </div>
-            <div class="alphabet-description">
-                <p><strong>📋 Como usar este guia:</strong></p>
-                <p>• Cada letra possui um formato específico das mãos</p>
-                <p>• Pratique os sinais em frente à câmera para testar o reconhecimento</p>
-                <p>• Mantenha a mão bem visível e centralizada na imagem</p>
-                <p>• Use boa iluminação para melhor reconhecimento</p>
-                <p>• Letras com movimentos(seta) não estão sendo reconhecidos</p>
-            </div>
-        </div>
-    </div>
-
     <div class="main-content">
         <div class="container">
             <header>
@@ -670,7 +552,7 @@
                 <p>Aprenda e pratique o alfabeto da Língua Brasileira de Sinais</p>
             </header>
 
-            <div id="httpsWarning" style="display: none;"></div>
+            <div id="https-warning"></div>
             <div id="serverStatus"></div>
             <div class="error-message" id="errorMessage"></div>
 
@@ -685,7 +567,6 @@
                 <button id="startBtn" class="btn">Iniciar Reconhecimento</button>
                 <button id="pauseBtn" class="btn" style="display: none;">Pausar</button>
                 <button id="listeningBtn" class="btn">Modo Escuta</button>
-                <button id="alphabetBtn" class="btn alphabet-btn">📚 Alfabeto</button>
                 <button id="testConnectionBtn" class="btn">Verificar Conexão</button>
             </div>
 
@@ -709,7 +590,6 @@
                 <li>Posicione sua mão no centro da câmera</li>
                 <li>Faça os sinais do alfabeto em Libras</li>
                 <li>As detecções serão salvas no histórico (sem repetições consecutivas)</li>
-                <li><strong>Clique em "📚 Alfabeto" para ver o guia completo dos sinais</strong></li>
             </ol>
         </div>
 
@@ -763,14 +643,13 @@
             const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
             const listeningBtn = document.getElementById('listeningBtn');
-            const alphabetBtn = document.getElementById('alphabetBtn');
             const testConnectionBtn = document.getElementById('testConnectionBtn');
             const detectedLetter = document.getElementById('detectedLetter');
             const recognizedLetter = document.getElementById('recognizedLetter');
             const cameraStatus = document.getElementById('cameraStatus');
             const errorMessage = document.getElementById('errorMessage');
             const serverStatus = document.getElementById('serverStatus');
-            const httpsWarning = document.getElementById('httpsWarning');
+            const httpsWarning = document.getElementById('https-warning');
             const listeningMode = document.getElementById('listeningMode');
             const currentLetterInfo = document.getElementById('currentLetterInfo');
             const currentDetectedLetter = document.getElementById('currentDetectedLetter');
@@ -782,10 +661,6 @@
             const sessionTime = document.getElementById('sessionTime');
             const lastDetection = document.getElementById('lastDetection');
             const notification = document.getElementById('notification');
-            
-            // Modal elements
-            const alphabetModal = document.getElementById('alphabetModal');
-            const closeModal = document.getElementById('closeModal');
             
             let isRunning = false;
             let isListening = false;
@@ -818,40 +693,16 @@
             startBtn.addEventListener('click', startCamera);
             pauseBtn.addEventListener('click', togglePause);
             listeningBtn.addEventListener('click', toggleListening);
-            alphabetBtn.addEventListener('click', openAlphabetModal);
             clearHistoryBtn.addEventListener('click', clearHistory);
-            closeModal.addEventListener('click', closeAlphabetModal);
-            
-            // Fechar modal ao clicar fora dele
-            alphabetModal.addEventListener('click', function(event) {
-                if (event.target === alphabetModal) {
-                    closeAlphabetModal();
-                }
-            });
-            
-            // Fechar modal com ESC
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && alphabetModal.style.display === 'block') {
-                    closeAlphabetModal();
-                }
-            });
             
             // Verificar HTTPS
             if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                showHttpsWarning();
-            }
-            
-            // Inicializar
-            checkServerStatus();
-            
-            function showHttpsWarning() {
+                httpsWarning.textContent = 'Este site precisa ser acessado via HTTPS para permitir o uso da câmera. Tente usar "https://" no início da URL.';
                 httpsWarning.style.display = 'block';
-                httpsWarning.innerHTML = `
-                    <strong>⚠️ Aviso de Segurança</strong><br>
-                    Para acessar a câmera, é necessário usar HTTPS. 
-                    Acesse através de: <code>https://${location.hostname}${location.pathname}</code>
-                `;
             }
+            
+            checkServerStatus();
+            loadHistory(); // Carregar histórico ao iniciar
             
             function toggleTheme() {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -865,12 +716,48 @@
             
             function showNotification(message, type = 'success') {
                 notification.textContent = message;
-                notification.style.backgroundColor = type === 'success' ? 'var(--success-color)' : 'var(--error-color)';
                 notification.style.display = 'block';
+                notification.style.backgroundColor = type === 'success' ? 'var(--success-color)' : 'var(--error-color)';
                 
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 3000);
+            }
+            
+            function checkServerStatus() {
+                testConnectionBtn.textContent = 'Verificando...';
+                testConnectionBtn.classList.add('loading');
+                
+                fetch('/status') // Endpoint de status do seu backend
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        serverStatus.style.display = 'block';
+                        serverStatus.innerHTML = `
+                            ✅ Servidor conectado! <br>
+                            Modelo carregado: ${data.model_loaded ? 'Sim' : 'Não'} <br>
+                            Classes disponíveis: ${data.classes ? data.classes.length : 0}
+                        `;
+                        serverStatus.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
+                        serverStatus.style.borderColor = 'var(--success-color)';
+                        showNotification('Conexão com servidor estabelecida!');
+                    })
+                    .catch(error => {
+                        serverStatus.style.display = 'block';
+                        serverStatus.innerHTML = '❌ Erro ao conectar com o servidor.';
+                        serverStatus.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                        serverStatus.style.borderColor = 'var(--error-color)';
+                        showNotification('Erro na conexão com servidor', 'error');
+                        console.error('Erro:', error);
+                    })
+                    .finally(() => {
+                        testConnectionBtn.textContent = 'Verificar Conexão';
+                        testConnectionBtn.classList.remove('loading');
+                    });
             }
             
             function showError(message) {
@@ -881,96 +768,85 @@
                 }, 5000);
             }
             
-            async function checkServerStatus() {
-                serverStatus.style.display = 'block';
-                serverStatus.innerHTML = '🔄 Verificando conexão com servidor...';
-                serverStatus.style.color = 'var(--warning-color)';
-                
-                try {
-                    // Simular verificação de servidor
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    // Como não temos um servidor real, vamos simular uma resposta
-                    const isServerOnline = Math.random() > 0.3; // 70% de chance de estar "online"
-                    
-                    if (isServerOnline) {
-                        serverStatus.innerHTML = '✅ Servidor conectado e funcionando';
-                        serverStatus.style.color = 'var(--success-color)';
-                        setTimeout(() => {
-                            serverStatus.style.display = 'none';
-                        }, 3000);
-                    } else {
-                        serverStatus.innerHTML = '❌ Servidor offline - Modo demonstração ativo';
-                        serverStatus.style.color = 'var(--error-color)';
-                    }
-                } catch (error) {
-                    serverStatus.innerHTML = '❌ Erro na conexão - Modo demonstração ativo';
-                    serverStatus.style.color = 'var(--error-color)';
-                }
-            }
-            
             async function startCamera() {
                 try {
-                    cameraStatus.textContent = 'Iniciando câmera...';
-                    cameraStatus.style.color = 'var(--warning-color)';
+                    startBtn.textContent = 'Iniciando...';
+                    startBtn.classList.add('loading');
+                    
+                    if (!navigator.mediaDevices?.getUserMedia) {
+                        showError('Seu navegador não suporta acesso à câmera.');
+                        return;
+                    }
                     
                     stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
                             width: { ideal: 640 },
                             height: { ideal: 480 },
                             facingMode: 'user'
-                        } 
+                        },
+                        audio: false
                     });
                     
                     video.srcObject = stream;
-                    video.play();
                     
-                    cameraStatus.textContent = '📹 Câmera ativa';
-                    cameraStatus.style.color = 'var(--success-color)';
+                    video.onloadedmetadata = function() {
+                        video.play();
+                        startBtn.style.display = 'none';
+                        pauseBtn.style.display = 'inline-block';
+                        cameraStatus.textContent = '📹 Câmera ativa';
+                        cameraStatus.style.color = 'var(--success-color)';
+                        
+                        isRunning = true;
+                        sessionStart = Date.now();
+                        processingInterval = setInterval(processFrame, 200); // Processar a cada 200ms
+                        sessionTimer = setInterval(updateSessionTime, 1000);
+                        
+                        showNotification('Câmera iniciada com sucesso!');
+                    };
                     
-                    startBtn.style.display = 'none';
-                    pauseBtn.style.display = 'inline-block';
-                    
-                    isRunning = true;
-                    startSessionTimer();
-                    showNotification('Câmera iniciada com sucesso!');
-                    
-                } catch (error) {
-                    console.error('Erro ao acessar câmera:', error);
-                    cameraStatus.textContent = '❌ Erro ao acessar câmera';
+                } catch (err) {
+                    console.error('Erro ao acessar câmera:', err);
+                    cameraStatus.textContent = '❌ Erro ao acessar a câmera';
                     cameraStatus.style.color = 'var(--error-color)';
-                    showError('Erro ao acessar a câmera. Verifique as permissões.');
+                    
+                    if (err.name === 'NotAllowedError') {
+                        showError('Permissão negada para acessar a câmera. Permita o acesso e tente novamente.');
+                    } else if (err.name === 'NotFoundError') {
+                        showError('Nenhuma câmera encontrada no dispositivo.');
+                    } else {
+                        showError('Erro ao acessar a câmera: ' + err.message);
+                    }
+                } finally {
+                    startBtn.textContent = 'Iniciar Reconhecimento';
+                    startBtn.classList.remove('loading');
                 }
             }
             
             function togglePause() {
                 if (isRunning) {
-                    pauseCamera();
-                } else {
-                    resumeCamera();
-                }
-            }
-            
-            function pauseCamera() {
-                isRunning = false;
-                pauseBtn.textContent = 'Retomar';
-                cameraStatus.textContent = '⏸️ Câmera pausada';
-                cameraStatus.style.color = 'var(--warning-color)';
-                
-                if (processingInterval) {
                     clearInterval(processingInterval);
-                    processingInterval = null;
+                    clearInterval(sessionTimer);
+                    video.pause();
+                    pauseBtn.textContent = 'Retomar';
+                    cameraStatus.textContent = '⏸️ Câmera pausada';
+                    cameraStatus.style.color = 'var(--warning-color)';
+                    isRunning = false;
+                    
+                    if (letterTimer) clearInterval(letterTimer);
+                    resetCurrentLetter();
+                } else {
+                    video.play();
+                    pauseBtn.textContent = 'Pausar';
+                    cameraStatus.textContent = '📹 Câmera ativa';
+                    cameraStatus.style.color = 'var(--success-color)';
+                    isRunning = true;
+                    processingInterval = setInterval(processFrame, 200);
+                    sessionTimer = setInterval(updateSessionTime, 1000);
+                    
+                    if (currentLetter && letterStartTime) {
+                        startLetterTimer(currentLetter, letterStartTime);
+                    }
                 }
-                
-                showNotification('Reconhecimento pausado');
-            }
-            
-            function resumeCamera() {
-                isRunning = true;
-                pauseBtn.textContent = 'Pausar';
-                cameraStatus.textContent = '📹 Câmera ativa';
-                cameraStatus.style.color = 'var(--success-color)';
-                showNotification('Reconhecimento retomado');
             }
             
             function toggleListening() {
@@ -981,139 +857,159 @@
                     listeningBtn.classList.add('listening');
                     listeningMode.style.display = 'block';
                     listeningMode.classList.add('active');
-                    startProcessing();
                     showNotification('Modo escuta ativado');
                 } else {
                     listeningBtn.textContent = 'Modo Escuta';
                     listeningBtn.classList.remove('listening');
                     listeningMode.style.display = 'none';
                     listeningMode.classList.remove('active');
-                    stopProcessing();
+                    resetCurrentLetter();
                     showNotification('Modo escuta desativado');
                 }
             }
             
-            function startProcessing() {
-                if (processingInterval) return;
+            function updateSessionTime() {
+                if (!sessionStart) return;
                 
-                processingInterval = setInterval(() => {
-                    if (isRunning && isListening) {
-                        simulateDetection();
-                    }
-                }, 2000); // Simular detecção a cada 2 segundos
+                const elapsed = Date.now() - sessionStart;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                sessionTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
             
-            function stopProcessing() {
-                if (processingInterval) {
-                    clearInterval(processingInterval);
-                    processingInterval = null;
-                }
+            function processFrame() {
+                if (!isRunning || !stream || video.readyState !== video.HAVE_ENOUGH_DATA) return;
                 
-                // Limpar timer da letra atual
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                fetch('/process_frame', { // Endpoint do seu backend para processar a imagem
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        showError('Erro de processamento: ' + data.error);
+                        detectedLetter.textContent = '-';
+                        recognizedLetter.textContent = 'Nenhuma';
+                        resetCurrentLetter();
+                        return;
+                    }
+                    
+                    const recognizedChar = data.letter || '-';
+                    detectedLetter.textContent = recognizedChar;
+                    recognizedLetter.textContent = recognizedChar === '-' ? 'Nenhuma' : recognizedChar;
+
+                    if (isListening && recognizedChar !== '-') {
+                        handleListeningDetection(recognizedChar);
+                    } else if (!isListening) {
+                        // Se não estiver em modo escuta, apenas exibe a detecção atual
+                        resetCurrentLetter();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na comunicação com o servidor de processamento:', error);
+                    showError('Falha na comunicação com o servidor de IA. Verifique a conexão.');
+                    detectedLetter.textContent = 'Erro';
+                    recognizedLetter.textContent = 'Erro de Rede';
+                    resetCurrentLetter();
+                });
+            }
+
+            function handleListeningDetection(detectedChar) {
+                if (currentLetter !== detectedChar) {
+                    // Nova letra detectada ou mudança de letra
+                    currentLetter = detectedChar;
+                    letterStartTime = Date.now();
+                    currentDetectedLetter.textContent = detectedChar;
+                    currentLetterInfo.style.display = 'block';
+                    startLetterTimer(detectedChar, letterStartTime);
+                } else {
+                    // Mesma letra, atualiza o tempo restante
+                    updateLetterTimerDisplay();
+                }
+            }
+
+            function startLetterTimer(letter, startTime) {
                 if (letterTimer) {
                     clearInterval(letterTimer);
-                    letterTimer = null;
-                    currentLetterInfo.style.display = 'none';
                 }
-            }
-            
-            function simulateDetection() {
-                // Simular detecção aleatória de letras
-                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                const randomIndex = Math.floor(Math.random() * letters.length);
-                const detectedChar = letters[randomIndex];
                 
-                // Chance de 30% de detectar uma letra
-                if (Math.random() > 0.7) {
-                    processDetection(detectedChar);
-                } else {
-                    // Mostrar que está "procurando"
-                    detectedLetter.textContent = '👀';
-                    recognizedLetter.textContent = 'Procurando...';
-                }
-            }
-            
-            function processDetection(letter) {
-                detectedLetter.textContent = letter;
-                recognizedLetter.textContent = letter;
-                
-                // Sistema de confirmação por tempo
-                if (currentLetter === letter) {
-                    // Mesma letra, continuar contagem
-                    return;
-                } else {
-                    // Nova letra detectada
-                    if (letterTimer) {
+                letterTimer = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const remaining = CONFIRMATION_TIME_MS - elapsed;
+
+                    if (remaining <= 0) {
                         clearInterval(letterTimer);
+                        addDetectionToHistory(letter);
+                        resetCurrentLetter();
+                    } else {
+                        const seconds = Math.ceil(remaining / 1000);
+                        timerDisplay.textContent = formatTime(seconds);
                     }
-                    
-                    currentLetter = letter;
-                    letterStartTime = Date.now();
-                    currentDetectedLetter.textContent = letter;
-                    
-                    // Mostrar info da letra atual
-                    currentLetterInfo.style.display = 'block';
-                    
-                    let timeLeft = CONFIRMATION_TIME_MS;
-                    
-                    letterTimer = setInterval(() => {
-                        timeLeft -= 100;
-                        const secondsLeft = Math.ceil(timeLeft / 1000);
-                        timerDisplay.textContent = `${secondsLeft}s`;
-                        
-                        if (timeLeft <= 0) {
-                            confirmLetter(letter);
-                            clearInterval(letterTimer);
-                            letterTimer = null;
-                            currentLetterInfo.style.display = 'none';
-                        }
-                    }, 100);
-                }
-            }
-            
-            function confirmLetter(letter) {
-                // Evitar adicionar a mesma letra consecutiva
-                if (lastHistoryLetter === letter) {
-                    return;
-                }
-                
-                // Adicionar ao histórico
-                const timestamp = new Date().toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                
-                const historyItem = {
-                    letter: letter,
-                    time: timestamp,
-                    id: Date.now()
-                };
-                
-                detectionHistory.unshift(historyItem);
-                lastHistoryLetter = letter;
-                
-                // Adicionar às letras únicas
-                uniqueLetters.add(letter);
-                
-                // Atualizar interface
-                updateHistoryDisplay();
-                updateStats();
-                
-                // Feedback visual e sonoro
-                detectedLetter.style.animation = 'pulse 1s ease';
-                setTimeout(() => {
-                    detectedLetter.style.animation = '';
                 }, 1000);
-                
-                showNotification(`Letra "${letter}" confirmada!`);
-                
-                // Limitar histórico a 50 itens
-                if (detectionHistory.length > 50) {
-                    detectionHistory = detectionHistory.slice(0, 50);
+
+                // Inicializa o display do timer imediatamente
+                updateLetterTimerDisplay();
+            }
+
+            function updateLetterTimerDisplay() {
+                if (currentLetter && letterStartTime) {
+                    const elapsed = Date.now() - letterStartTime;
+                    const remaining = CONFIRMATION_TIME_MS - elapsed;
+                    const seconds = Math.ceil(remaining / 1000);
+                    timerDisplay.textContent = formatTime(seconds);
+                } else {
+                    timerDisplay.textContent = formatTime(CONFIRMATION_TIME_MS / 1000);
                 }
             }
-            
+
+            function resetCurrentLetter() {
+                if (letterTimer) {
+                    clearInterval(letterTimer);
+                }
+                currentLetter = null;
+                letterStartTime = null;
+                currentDetectedLetter.textContent = '-';
+                timerDisplay.textContent = formatTime(CONFIRMATION_TIME_MS / 1000);
+                currentLetterInfo.style.display = 'none';
+            }
+
+            function formatTime(totalSeconds) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes.toString().padStart(1, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            function addDetectionToHistory(letter) {
+                if (letter === lastHistoryLetter) {
+                    return; // Evita adicionar a mesma letra consecutivamente
+                }
+
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                const historyItem = { letter, time: timeString };
+                detectionHistory.unshift(historyItem); // Adiciona no início da lista
+
+                updateHistoryDisplay();
+                updateStats(letter);
+                showNotification(`Letra "${letter}" reconhecida e adicionada ao histórico!`);
+                lastHistoryLetter = letter;
+            }
+
             function updateHistoryDisplay() {
                 if (detectionHistory.length === 0) {
                     historyList.innerHTML = `
@@ -1121,110 +1017,62 @@
                             Nenhuma detecção ainda
                         </div>
                     `;
-                    return;
-                }
-                
-                historyList.innerHTML = detectionHistory.map(item => `
-                    <div class="history-item">
-                        <div class="history-letter">${item.letter}</div>
-                        <div class="history-time">${item.time}</div>
-                    </div>
-                `).join('');
-            }
-            
-            function updateStats() {
-                totalDetections.textContent = uniqueLetters.size;
-                lastDetection.textContent = detectionHistory.length > 0 ? detectionHistory[0].letter : '-';
-            }
-            
-            function clearHistory() {
-                if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
-                    detectionHistory = [];
-                    lastHistoryLetter = null;
-                    uniqueLetters.clear();
-                    updateHistoryDisplay();
-                    updateStats();
-                    showNotification('Histórico limpo!');
-                }
-            }
-            
-            function startSessionTimer() {
-                sessionStart = Date.now();
-                
-                sessionTimer = setInterval(() => {
-                    const elapsed = Date.now() - sessionStart;
-                    const minutes = Math.floor(elapsed / 60000);
-                    const seconds = Math.floor((elapsed % 60000) / 1000);
-                    sessionTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                }, 1000);
-            }
-            
-            function openAlphabetModal() {
-                alphabetModal.style.display = 'block';
-                document.body.style.overflow = 'hidden'; // Prevenir scroll do body
-            }
-            
-            function closeAlphabetModal() {
-                alphabetModal.style.display = 'none';
-                document.body.style.overflow = 'auto'; // Restaurar scroll do body
-            }
-            
-            // Cleanup quando a página for fechada
-            window.addEventListener('beforeunload', function() {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                
-                if (processingInterval) {
-                    clearInterval(processingInterval);
-                }
-                
-                if (letterTimer) {
-                    clearInterval(letterTimer);
-                }
-                
-                if (sessionTimer) {
-                    clearInterval(sessionTimer);
-                }
-            });
-            
-            // Detectar mudanças de visibilidade da página
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    // Página não está visível, pausar processamento
-                    if (isListening) {
-                        stopProcessing();
-                    }
                 } else {
-                    // Página voltou a ficar visível, retomar processamento
-                    if (isListening && isRunning) {
-                        startProcessing();
-                    }
+                    historyList.innerHTML = detectionHistory.map(item => `
+                        <div class="history-item">
+                            <span class="history-letter">${item.letter}</span>
+                            <span class="history-time">${item.time}</span>
+                        </div>
+                    `).join('');
                 }
-            });
-            
-            // Tratamento de erros globais
-            window.addEventListener('error', function(event) {
-                console.error('Erro global:', event.error);
-                showError('Ocorreu um erro inesperado. Recarregue a página se necessário.');
-            });
-            
-            // Tratamento para promises rejeitadas
-            window.addEventListener('unhandledrejection', function(event) {
-                console.error('Promise rejeitada:', event.reason);
-                showError('Erro de processamento. Verifique a conexão.');
-            });
-            
-            // Log de inicialização
-            console.log('🤟 Sistema de Reconhecimento de Libras Iniciado');
-            console.log('Desenvolvido por André Vitor, Sarah Ramos e Julio Cesar');
-            
-            // Mostrar dica inicial
-            setTimeout(() => {
-                if (!isRunning) {
-                    showNotification('Clique em "Iniciar Reconhecimento" para começar!', 'info');
+                saveHistory();
+            }
+
+            function updateStats(letter) {
+                detectionCount++;
+                uniqueLetters.add(letter);
+                totalDetections.textContent = uniqueLetters.size;
+                lastDetection.textContent = letter + ' (' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ')';
+            }
+
+            function clearHistory() {
+                detectionHistory = [];
+                uniqueLetters.clear();
+                detectionCount = 0;
+                lastHistoryLetter = null;
+                totalDetections.textContent = '0';
+                lastDetection.textContent = '-';
+                updateHistoryDisplay();
+                showNotification('Histórico limpo!', 'info');
+            }
+
+            function saveHistory() {
+                localStorage.setItem('detectionHistory', JSON.stringify(detectionHistory));
+                localStorage.setItem('uniqueLetters', JSON.stringify(Array.from(uniqueLetters)));
+                localStorage.setItem('lastHistoryLetter', lastHistoryLetter);
+            }
+
+            function loadHistory() {
+                const savedHistory = localStorage.getItem('detectionHistory');
+                const savedUniqueLetters = localStorage.getItem('uniqueLetters');
+                const savedLastHistoryLetter = localStorage.getItem('lastHistoryLetter');
+
+                if (savedHistory) {
+                    detectionHistory = JSON.parse(savedHistory);
                 }
-            }, 2000);
+                if (savedUniqueLetters) {
+                    uniqueLetters = new Set(JSON.parse(savedUniqueLetters));
+                }
+                if (savedLastHistoryLetter) {
+                    lastHistoryLetter = savedLastHistoryLetter;
+                }
+                
+                totalDetections.textContent = uniqueLetters.size;
+                if (detectionHistory.length > 0) {
+                    lastDetection.textContent = detectionHistory[0].letter + ' (' + detectionHistory[0].time.substring(0, 5) + ')';
+                }
+                updateHistoryDisplay();
+            }
         });
     </script>
 </body>
